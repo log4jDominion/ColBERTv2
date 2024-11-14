@@ -24,7 +24,7 @@ if __name__ == '__main__':
             root=base_url+"/experiments",
         )
         indexer = Indexer(checkpoint="colbert-ir/colbertv2.0", config=config)
-        indexer.index(name="msmarco.nbits=2", collection=base_url+"/resources/msmarco/collection/.dev.tsv", overwrite=True)
+        indexer.index(name="msmarco.nbits=2", collection=base_url+"/resources/msmarco/collection.dev.tsv", overwrite=True)
 
     with Run().context(RunConfig(nranks=1, experiment="msmarco")):
         config = ColBERTConfig(
