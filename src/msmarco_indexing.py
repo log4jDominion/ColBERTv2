@@ -3,6 +3,7 @@ from colbert.infra import Run, RunConfig, ColBERTConfig
 from colbert import Indexer, Searcher
 
 import platform
+import faiss
 
 
 def get_base_url():
