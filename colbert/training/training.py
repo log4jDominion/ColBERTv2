@@ -143,7 +143,7 @@ def train(config: ColBERTConfig, triples, queries=None, collection=None):
 
     if config.rank < 1:
         print_message("#> Done with all triples!")
-        ckpt_path = manage_checkpoints(config, colbert, optimizer, batch_idx+1, savepath=None, consumed_all_triples=True)
+        ckpt_path = manage_checkpoints(config, colbert, optimizer, 1, savepath=None, consumed_all_triples=True)
 
         return ckpt_path  # TODO: This should validate and return the best checkpoint, not just the last one.
 
