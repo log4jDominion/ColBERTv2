@@ -10,8 +10,9 @@ def fine_tuning_model(qrels, queries, collection):
         config = ColBERTConfig(bsize=32, root="experiments")
 
         trainer = Trainer(triples=qrels, queries=queries, collection=collection, config=config)
+        trainer.train()
 
-        checkpoint_path = trainer.train()
+        checkpoint_path = trainer.best_checkpoint_path()
 
         print(f"Saved checkpoint to {checkpoint_path}...")
 
