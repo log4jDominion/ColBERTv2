@@ -48,4 +48,4 @@ if __name__ == '__main__':
 
     fine_tuning_model(qrels, queries, collection)
 
-    results = [search_queries(query) for query in queries]
+    results = [search_queries(query) for query in queries.values()]
