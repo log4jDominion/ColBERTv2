@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+import datetime
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
