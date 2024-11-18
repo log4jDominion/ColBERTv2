@@ -48,8 +48,8 @@ def fine_tune_colbert():
     base_url = os.getenv(Vars.RESOURCES.name)
     with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
         config = ColBERTConfig(similarity='cosine')
-        trainer = Trainer(triples=base_url + '/sushi/triples.jsonl', queries=base_url + '/sushi/queries.tsv',
-                          collection=base_url + '/sushi/collection.tsv', config=config, )
+        trainer = Trainer(triples=base_url + '/msmarco/triples.jsonl', queries=base_url + '/msmarco/queries/queries.train.tsv',
+                          collection=base_url + '/msmarco/collection.tsv', config=config, )
 
         trainer.train(checkpoint='colbert-ir/colbertv1.9')
         checkpoint_path = trainer.best_checkpoint_path()
