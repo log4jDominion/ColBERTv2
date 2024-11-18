@@ -47,11 +47,11 @@ def build_qrels(queries):
 def fine_tune_colbert():
     base_url = os.getenv(Vars.RESOURCES.name)
     with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
-        config = ColBERTConfig(bsize=32, root="experiments", checkpoint="colbert-ir/colbertv2.0")
+        config = ColBERTConfig(bsize=32, lr=1e-05, warmup=20000, doc_maxlen=180, dim=128, attend_to_mask_tokens=False, nway=64, accumsteps=1, similarity='cosine', use_ib_negatives=True)
         trainer = Trainer(triples=base_url + '/sushi/triples.jsonl', queries=base_url + '/sushi/queries.tsv',
             collection=base_url + '/sushi/collection.tsv', config=config, )
 
-        trainer.train()
+        trainer.train(checkpoint='colbert-ir/colbertv1.9')
         checkpoint_path = trainer.best_checkpoint_path()
 
         print(f"Saved checkpoint to {checkpoint_path}...")
