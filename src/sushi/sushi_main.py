@@ -42,14 +42,12 @@ def eval_model():
 
     for experimentSet in control_file['ExperimentSets']:
         training_dataset, labels = data_util.create_dry_run_data(experimentSet['TrainingDocuments'], search_fields)
-        topics = experimentSet['Topics']
+        topics = list(experimentSet['Topics'].keys())
         colbert.train_colbert(training_dataset, labels)
-        queries_list = []
         for j in range(len(topics)):
             results.append({})
             results[i]['Id'] = topics[j]
             query = experimentSet['Topics'][topics[j]]['TITLE']
-            queries_list.append(query)
             rankedFolderList = colbert.colbert_search(query)
             results[i]['RankedList'] = rankedFolderList
             i += 1
