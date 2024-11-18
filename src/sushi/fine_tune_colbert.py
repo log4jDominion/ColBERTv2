@@ -1,22 +1,21 @@
-import json
 import os
+from datetime import datetime
 
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-import sushi_dry_run_data as data_util
 import sushi_main as main
 from colbert import Indexer, Searcher, Trainer
-from colbert.data import Queries
 from colbert.infra import Run, RunConfig, ColBERTConfig
 from src.sushi.enums.env_vars import Vars
 
 root = '/colbert_training'
 experiment_name = 'colbert_fine_tuning'
 index_name = 'sushi.fine.tuning.index'
-
-index = 0
+checkpoint = None
+collection = None
+lables = None
 
 
 def find_most_dissimilar(strings, target_index):
@@ -48,26 +47,18 @@ def build_qrels(queries):
 def fine_tune_colbert():
     base_url = os.getenv(Vars.RESOURCES.name)
     with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
-
-        config = ColBERTConfig(
-            bsize=32,
-            root="experiments",
-            checkpoint="colbert-ir/colbertv2.0"
-        )
-        trainer = Trainer(
-            triples=base_url+'/sushi/triples.jsonl',
-            queries=base_url+'/sushi/queries.tsv',
-            collection=base_url+'/sushi/collection.tsv',
-            config=config,
-        )
+        config = ColBERTConfig(bsize=32, root="experiments", checkpoint="colbert-ir/colbertv2.0")
+        trainer = Trainer(triples=base_url + '/sushi/triples.jsonl', queries=base_url + '/sushi/queries.tsv',
+            collection=base_url + '/sushi/collection.tsv', config=config, )
 
         trainer.train()
         checkpoint_path = trainer.best_checkpoint_path()
 
         print(f"Saved checkpoint to {checkpoint_path}...")
+        global checkpoint
+        checkpoint = checkpoint_path
 
-        # indexer = Indexer(checkpoint=checkpoint_path, config=config)
-        # indexer.index(name=index_name, collection=collection, overwrite=True)
+        # indexer = Indexer(checkpoint=checkpoint_path, config=config)  # indexer.index(name=index_name, collection=collection, overwrite=True)
 
 
 def colbert_query_search(query):
@@ -85,8 +76,48 @@ def colbert_query_search(query):
         return ranked_list
 
 
-def fine_tune_model():
-    fine_tune_colbert()
+def train_model(nbits, doc_maxlen):
+    print(f"Indexing: {len(collection)} records")
+    print(f"Training on checkpoint: {checkpoint}")
+    with Run().context(RunConfig(nranks=1, experiment=experiment_name)):  # nranks specifies the number of GPUs to use
+        config = ColBERTConfig(nbits=nbits, root=experiment_name, doc_maxlen=doc_maxlen)
+        # Consider larger numbers for small datasets.
+
+        indexer = Indexer(checkpoint=checkpoint, config=config)
+        indexer.index(name=index_name, collection=collection, overwrite=True)
+
+    indexer.get_index()
+
+
+def colbert_search(query):
+    with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
+        config = ColBERTConfig(root=experiment_name)
+        searcher = Searcher(index=index_name, config=config)
+
+    # Find the top-5 passages for this query
+    results = searcher.search(query, k=5)
+
+    ranked_list = []
+
+    for passage_id, passage_rank, passage_score in zip(*results):
+        ranked_list.append(labels[
+                               passage_id])  # print(f"\t{labels[passage_id]} \t\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {searcher.collection[passage_id]}")
+
+    return ranked_list
+
+
+def train_colbert(training_data, training_labels):
+    print(f"***********************Indexing starts at {datetime.datetime.now()}*************************")
+
+    global collection
+    collection = training_data
+
+    global labels
+    labels = training_labels
+
+    train_model(2, 500)
+
+    print(f'***********************Indexing ends at {datetime.datetime.now()}*************************')
 
 
 if __name__ == '__main__':

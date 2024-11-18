@@ -38,10 +38,12 @@ def eval_model():
     results = []
     i = 0
 
+    colbert.fine_tune_colbert()
+
     for experimentSet in control_file['ExperimentSets']:
         training_dataset, labels = data_util.create_dry_run_data(experimentSet['TrainingDocuments'], search_fields)
         topics = experimentSet['Topics']
-        colbert.train_model(training_dataset, labels, topics)
+        colbert.train_colbert(training_dataset, labels)
         queries_list = []
         for j in range(len(topics)):
             results.append({})
@@ -154,10 +156,8 @@ if __name__ == '__main__':
 
     prefix = os.getenv(Vars.PREFIX.name)
 
-    colbert.fine_tune_model()
-
-    # results = eval_model()
-    # writeSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv', results, 'Baseline-0')
-    # evaluateSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv',
-    #                       prefix + 'Ntcir18SushiDryRunFolderQrelsV1.1.tsv',
-    #                       prefix + 'Ntcir18SushiDryRunBoxQrelsV1.1.tsv')
+    results = eval_model()
+    writeSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv', results, 'Baseline-0')
+    evaluateSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv',
+                          prefix + 'Ntcir18SushiDryRunFolderQrelsV1.1.tsv',
+                          prefix + 'Ntcir18SushiDryRunBoxQrelsV1.1.tsv')
