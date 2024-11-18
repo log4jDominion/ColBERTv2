@@ -1,17 +1,82 @@
-from colbert.infra import Run, RunConfig, ColBERTConfig
-from colbert import Trainer, Indexer, Searcher
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-experiment_name = 'sushi_fine_tuning'
+import sushi_dry_run_data as data_util
+import sushi_main as main
+from colbert import Indexer, Searcher, Trainer
+from colbert.data import Queries
+from colbert.infra import Run, RunConfig, ColBERTConfig
+
+root = '/colbert_training'
+experiment_name = 'colbert_fine_tuning'
 index_name = 'sushi.fine.tuning.index'
 
+index = 0
 
-def fine_tuning_model(qrels, queries, collection):
+
+def find_most_dissimilar(strings, target_index):
+    # Vectorize the strings using TF-IDF
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(strings)
+
+    # Compute cosine similarity between the target string and all others
+    target_vector = tfidf_matrix[target_index]
+    similarities = cosine_similarity(target_vector, tfidf_matrix).flatten()
+
+    # Set the similarity of the target string to itself to 1 (maximum similarity)
+    similarities[target_index] = 1
+
+    # Find the string with the lowest similarity score (most dissimilar)
+    most_dissimilar_index = np.argmin(similarities)
+
+    return most_dissimilar_index
+
+
+def build_qrels(queries):
+    qrels = []
+    for i, query in enumerate(queries):
+        negative_index = find_most_dissimilar(queries, i)
+        qrels.append([i, i, negative_index])
+    return qrels
+
+
+def create_fine_tuning_dataset(control_file, search_fields):
+    training_dataset = []
+    queries = []
+    collection = []
+
+    for experimentSet in control_file['ExperimentSets']:
+        dataset = data_util.create_trainingSet(experimentSet['TrainingDocuments'])
+        query_data = [dict['title'] for dict in dataset]
+        data, label = data_util.create_dry_run_data(experimentSet['TrainingDocuments'], search_fields)
+        training_dataset.extend(dataset)
+        queries.extend(query_data)
+        collection.extend(data)
+
+    qrels = build_qrels(queries)
+    query_dict = {str(index): str(query) for index, query in enumerate(queries)}
+    return qrels, query_dict, collection
+
+
+def fine_tune_colbert(qrels, queries, collection):
+    print(f"Qrels: {qrels}")
+    print(f"Queries: {queries}")
+    print(f"Collection: {collection}")
     with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
-        config = ColBERTConfig(bsize=32, root="experiments")
 
-        trainer = Trainer(triples=qrels, queries=queries, collection=collection, config=config)
+        config = ColBERTConfig(
+            bsize=32,
+            root="experiments"
+        )
+        trainer = Trainer(
+            triples=qrels,
+            queries=queries,
+            collection=collection,
+            config=config,
+        )
+
         trainer.train()
-
         checkpoint_path = trainer.best_checkpoint_path()
 
         print(f"Saved checkpoint to {checkpoint_path}...")
@@ -20,17 +85,24 @@ def fine_tuning_model(qrels, queries, collection):
         indexer.index(name=index_name, collection=collection, overwrite=True)
 
 
-def search_queries(query):
+def colbert_query_search(query):
     with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
-        config = ColBERTConfig(root=experiment_name)
+        config = ColBERTConfig(root=root, )
         searcher = Searcher(index=index_name, config=config)
+        results = searcher.search(query, k=1000)
 
-    # Find the top-5 passages for this query
-    results = searcher.search(query, k=5)
+        ranked_list = []
 
-    print(results)
+        for passage_id, passage_rank, passage_score in zip(*results):
+            ranked_list.append(labels[
+                                   passage_id])  # print(f"\t{labels[passage_id]} \t\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {searcher.collection[passage_id]}")
 
-    return results
+        return ranked_list
+
+
+def fine_tune_model(control_file, search_fields):
+    qrels, queries, collection = create_fine_tuning_dataset(control_file, search_fields)
+    fine_tune_colbert(qrels, queries, collection)
 
 
 if __name__ == '__main__':
@@ -38,6 +110,7 @@ if __name__ == '__main__':
     queries = {0: "Visit of Brazilian FORMIN", 1: "Goias Vice-Governorship", 2: "Presidential Elections",
                3: "Brazilian Coffee and Sugar Industry", 4: "Northeast Election Results",
                5: "IBAD Dissolved After Investigations"}
+    labels = ['A9999907', 'A9999908', 'A9999909', 'A9999910', 'A9999911', 'A9999912']
     collection = [
         "Problems of Brazilian Rural Labor Union as Seen in Typical Northeastern Community LAB 3 Organizations & Conferences 1964 (Classified)  LIMITED OPPICIAL DSl Air Pouoh  DEPARTMENT OF 3TATB  INFO f RIO DE JANEIRO, BRASILIA, SALVADOR  AaConOen RECIFE i^ril 21^, 19614.  Problems of Brazilian Rural Labor Onion as Seen in  Typical Northeastern Qoiaraunity  A-138, April 23, 19614.  filBiARY AND INTRODUGTICM  Th9 drafting officer and Jose do Patrooinio OLiyEIRA,  director of the Recife office of 0 Olobo visited Vitoria de  Santo Antao, one of the foci of rural agitation in Pernambuco,  on April 17, 19614., The most ooiaplete tranquility appeared to  reign and not a single soldier was seen. Both the vicar of  the parish. Padre Renato da Cunha CWALGANTI, and the president  of the local syndicate of rural laborers, Manuel Alves de ARAUJO  Pilho, mphasizod the difficulties encountered by the rural  union which, before the revolution, had to fight on two fronts—  against the Ligas and against the majority of the landowners,  l^e main problem now facing the union, which presently enjoys  a monopoly situation, is its lack of trained leaders, facilities  and equipment, A suggestion is made that assistance, preferably  not tlrirough United States Ooverraaont agencies, be rendered to  unigns such as the Sindioato dos Trabalhadores Rurais de Santo  Antao.  SETTING  One of the centers of rural agitation in the Northeast,  the munlcipio of Vitoria de Santo Antao, had a population of  89,000 in 1900, It is typical of the humid zone (zona da mata)  in that its economy revolves around the growing a net processing  of sugar cane. Mill and plantation owners (uslneiros and senhores  de engenho) form its aristocracy while field hands (oamponeses)  form a teeming and miserable rural proletariat which, until ro- oent years, had evolved but little since the days of slavery,  LIMITED OFFICIAL USE  FExtonsje",
         "Basic Info About Caruaru POL 18 Pernambuco 1964 (Classified)  TELEGRAM  INCOMING Foreign Service of the  United States of America  LIMITED OPPICIAL USE  Classification Control:  Reed :Jan 2, 196it.  8:30 AM^y^^  PROM: RIO (/  NO : TOPAO 102, December 31 > ^1- PM  USITO 15.  Send basic info Caruaru for forwarding agency. Pictures other  illustrative material would be helpful securing sister city- affiliation.  BOERNER 6y  LIMITED OPPICIAL USE  REPRODUCTION FROM THIS COPY IS  Classification 'B'TEO UNLESS UNCLASSIFIED'r  FORM FS-412  MM POST ACTION COPY  GPO 89 20 57 ",
@@ -46,6 +119,5 @@ if __name__ == '__main__':
         "Northeast School Loan Program - USAID USAID-NE SECRET 1964-67  m LIMITED OFFICIAL USE  EMBASSY  At UNITED STATES OF AMERICA  Rio de Janeiro, Brazil  April 19, 1967  OF FICIAL - INF ORMAL  Grant H. Hilliker, Esquire  American Consul General  American Consulate General  Recife  Enclosed is a copy of a memorandum which 1 have sent to Bill Ellis  in response to the memorandum he furnished me on the subject of  the Northeast School Loan Program raised in your letter of April 5.  We appreciate having this problem brought to our attention and I am  happy to see that AID is sensitive to the complexities of the problem.  We attach a great deal of importance to education and of course it is  one of the most difficult areas in which to work because of Brazilian  sensitivities and the nationalistic attacks on our efforts to cooperate.  While solution of the education problem will not assure Brazil entry  into economic take-off/world power status, it is hard to envision the  country reaching that stage without solving it.  Sincerely,  7cnsuiate Genera! oi  United States of Amcr  APR 2 ? 1967  Philip Raine  Recife, Brazil Deputy Chief of Mission  Enclosure:  Copy of Memo to Mr. Ellis.  cc:USAlD:William Ellis  LIMITED OFFICIAL USE",
         "Specifications for the Construction of the American School in Recife EDU 9-5 - American School of Recife  0^  11 - I. ixION OF xHi; AFRICAN SCHCCL  TABLE Of COHxiaiTS  I) bwrn. ..I0I3  II) r.mcLiiios  1,.2 'G'vi^>--i  m) MCAVlilCSj ilLLlMCi LSfgtm  IV) CORCRETE  V) MASOSKT AMD PLABT^I  ¥1) WOOD PMI-tm  VII) ROOFS ARD FALSE C  VUl) GLASSES MD FOIWS  U) WATER lAMK  X) CI3l£li.IRGa  SI) PLOCF ijr.-^'-^ Vr CIAIGG  'iJDOD FLOORS MD fRULES 111)  nil)  m HARARE  Xfl) - L .  XVII) iffI«miC IMSxALLMiai  XVIII) ELECTRIC WSiALLAiiai  XIS) CLC...,.^;, -illD FITTIKGS  XX) PARKHJC PL.iCK. RS  ... GLOSEi'S"]
 
-    fine_tuning_model(qrels, queries, collection)
-
-    results = [search_queries(query) for query in queries.values()]
+    main.set_env_vars()
+    fine_tune_colbert(qrels, queries, collection)

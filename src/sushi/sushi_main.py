@@ -7,7 +7,7 @@ import pytrec_eval
 
 from src.sushi.enums.env_vars import Vars
 import sushi_dry_run_data as data_util
-import train_colbert as colbert
+import fine_tune_colbert as colbert
 
 
 def set_env_vars():
@@ -38,8 +38,8 @@ def eval_model():
 
     for experimentSet in control_file['ExperimentSets']:
         training_dataset, labels = data_util.create_dry_run_data(experimentSet['TrainingDocuments'], search_fields)
-        colbert.train_colbert(training_dataset, labels)
-        topics = list(experimentSet['Topics'].keys())
+        topics = experimentSet['Topics']
+        colbert.train_model(training_dataset, labels, topics)
         queries_list = []
         for j in range(len(topics)):
             results.append({})
@@ -152,8 +152,10 @@ if __name__ == '__main__':
 
     prefix = os.getenv(Vars.PREFIX.name)
 
-    results = eval_model()
-    writeSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv', results, 'Baseline-0')
-    evaluateSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv',
-                          prefix + 'Ntcir18SushiDryRunFolderQrelsV1.1.tsv',
-                          prefix + 'Ntcir18SushiDryRunBoxQrelsV1.1.tsv')
+    colbert.fine_tune_model(control_file, search_fields)
+
+    # results = eval_model()
+    # writeSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv', results, 'Baseline-0')
+    # evaluateSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv',
+    #                       prefix + 'Ntcir18SushiDryRunFolderQrelsV1.1.tsv',
+    #                       prefix + 'Ntcir18SushiDryRunBoxQrelsV1.1.tsv')
