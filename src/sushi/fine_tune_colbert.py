@@ -51,7 +51,8 @@ def fine_tune_colbert():
 
         config = ColBERTConfig(
             bsize=32,
-            root="experiments"
+            root="experiments",
+            checkpoint="colbert-ir/colbertv2.0"
         )
         trainer = Trainer(
             triples=base_url+'/sushi/triples.jsonl',
