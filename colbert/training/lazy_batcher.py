@@ -68,6 +68,10 @@ class LazyBatcher():
         return self.collate(all_queries, all_passages, all_scores)
 
     def collate(self, queries, passages, scores):
+        print(f"Queries len : {len(queries)}")
+        print(f"bsize len : {self.bsize}")
+        print(f"Passage len : {len(passages)}")
+        print(f"nway len : {self.nway}")
         assert len(queries) == self.bsize
         assert len(passages) == self.nway * self.bsize
 
