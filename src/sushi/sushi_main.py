@@ -38,7 +38,7 @@ def eval_model():
     results = []
     i = 0
 
-    colbert.fine_tune_colbert()
+    # colbert.fine_tune_colbert()
 
     for experimentSet in control_file['ExperimentSets']:
         training_dataset, labels = data_util.create_dry_run_data(experimentSet['TrainingDocuments'], search_fields)

@@ -13,7 +13,7 @@ from src.sushi.enums.env_vars import Vars
 root = '/colbert_training'
 experiment_name = 'colbert_fine_tuning'
 index_name = 'sushi.fine.tuning.index'
-checkpoint = None
+checkpoint = "colbert-ir/colbertv2.0"
 collection = None
 lables = None
 
