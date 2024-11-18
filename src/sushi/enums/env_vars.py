@@ -7,3 +7,4 @@ class Vars(Enum):
     JAVA_HOME = 'JAVA_HOME'
     PREFIX = 'prefix'
     FOLDER = 'folder'
+    RESOURCES = 'resources'

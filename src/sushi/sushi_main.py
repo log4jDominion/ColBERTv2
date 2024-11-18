@@ -15,9 +15,11 @@ def set_env_vars():
     if platform.system() == "Linux":
         os.environ[Vars.JAVA_HOME.name] = "C:/Program Files/Java/jdk-22/"
         os.environ[Vars.PREFIX.name] = "/fs/clip-projects/archive_search/sushi/"
+        os.environ[Vars.RESOURCES.name] = "/fs/clip-projects/archive_search/ColBERT_Code/ColBERTv2/resources"
     elif platform.system() == "Darwin":
         os.environ[Vars.JAVA_HOME.name] = "C:/Program Files/Java/jdk-22/"
         os.environ[Vars.PREFIX.name] = "/Users/shashank/Research/sushi/"
+        os.environ[Vars.RESOURCES.name] = "/Users/shashank/projects/ColBERT_Code/ColBERT/resources"
 
 
 def readExperimentControlFile():
@@ -152,7 +154,7 @@ if __name__ == '__main__':
 
     prefix = os.getenv(Vars.PREFIX.name)
 
-    colbert.fine_tune_model(control_file, search_fields)
+    colbert.fine_tune_model()
 
     # results = eval_model()
     # writeSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv', results, 'Baseline-0')

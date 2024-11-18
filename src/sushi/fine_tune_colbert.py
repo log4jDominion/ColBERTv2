@@ -1,3 +1,6 @@
+import json
+import os
+
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -7,6 +10,7 @@ import sushi_main as main
 from colbert import Indexer, Searcher, Trainer
 from colbert.data import Queries
 from colbert.infra import Run, RunConfig, ColBERTConfig
+from src.sushi.enums.env_vars import Vars
 
 root = '/colbert_training'
 experiment_name = 'colbert_fine_tuning'
@@ -41,28 +45,8 @@ def build_qrels(queries):
     return qrels
 
 
-def create_fine_tuning_dataset(control_file, search_fields):
-    training_dataset = []
-    queries = []
-    collection = []
-
-    for experimentSet in control_file['ExperimentSets']:
-        dataset = data_util.create_trainingSet(experimentSet['TrainingDocuments'])
-        query_data = [dict['title'] for dict in dataset]
-        data, label = data_util.create_dry_run_data(experimentSet['TrainingDocuments'], search_fields)
-        training_dataset.extend(dataset)
-        queries.extend(query_data)
-        collection.extend(data)
-
-    qrels = build_qrels(queries)
-    query_dict = {str(index): str(query) for index, query in enumerate(queries)}
-    return qrels, query_dict, collection
-
-
-def fine_tune_colbert(qrels, queries, collection):
-    print(f"Qrels: {qrels}")
-    print(f"Queries: {queries}")
-    print(f"Collection: {collection}")
+def fine_tune_colbert():
+    base_url = os.getenv(Vars.RESOURCES.name)
     with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
 
         config = ColBERTConfig(
@@ -70,9 +54,9 @@ def fine_tune_colbert(qrels, queries, collection):
             root="experiments"
         )
         trainer = Trainer(
-            triples=qrels,
-            queries=queries,
-            collection=collection,
+            triples=base_url+'/sushi/triples.jsonl',
+            queries=base_url+'/sushi/queries.tsv',
+            collection=base_url+'/sushi/collection.tsv',
             config=config,
         )
 
@@ -81,8 +65,8 @@ def fine_tune_colbert(qrels, queries, collection):
 
         print(f"Saved checkpoint to {checkpoint_path}...")
 
-        indexer = Indexer(checkpoint=checkpoint_path, config=config)
-        indexer.index(name=index_name, collection=collection, overwrite=True)
+        # indexer = Indexer(checkpoint=checkpoint_path, config=config)
+        # indexer.index(name=index_name, collection=collection, overwrite=True)
 
 
 def colbert_query_search(query):
@@ -100,9 +84,8 @@ def colbert_query_search(query):
         return ranked_list
 
 
-def fine_tune_model(control_file, search_fields):
-    qrels, queries, collection = create_fine_tuning_dataset(control_file, search_fields)
-    fine_tune_colbert(qrels, queries, collection)
+def fine_tune_model():
+    fine_tune_colbert()
 
 
 if __name__ == '__main__':
@@ -120,4 +103,4 @@ if __name__ == '__main__':
         "Specifications for the Construction of the American School in Recife EDU 9-5 - American School of Recife  0^  11 - I. ixION OF xHi; AFRICAN SCHCCL  TABLE Of COHxiaiTS  I) bwrn. ..I0I3  II) r.mcLiiios  1,.2 'G'vi^>--i  m) MCAVlilCSj ilLLlMCi LSfgtm  IV) CORCRETE  V) MASOSKT AMD PLABT^I  ¥1) WOOD PMI-tm  VII) ROOFS ARD FALSE C  VUl) GLASSES MD FOIWS  U) WATER lAMK  X) CI3l£li.IRGa  SI) PLOCF ijr.-^'-^ Vr CIAIGG  'iJDOD FLOORS MD fRULES 111)  nil)  m HARARE  Xfl) - L .  XVII) iffI«miC IMSxALLMiai  XVIII) ELECTRIC WSiALLAiiai  XIS) CLC...,.^;, -illD FITTIKGS  XX) PARKHJC PL.iCK. RS  ... GLOSEi'S"]
 
     main.set_env_vars()
-    fine_tune_colbert(qrels, queries, collection)
+    fine_tune_colbert()
