@@ -168,6 +168,8 @@ def colbert_score(Q, D_padded, D_mask, config=ColBERTConfig()):
     if use_gpu:
         Q, D_padded, D_mask = Q.cuda(), D_padded.cuda(), D_mask.cuda()
 
+    print(f"Q.size(0): {Q.size(0)}")
+    print(f"D_padded.size(0): {D_padded.size()}")
     assert Q.dim() == 3, Q.size()
     assert D_padded.dim() == 3, D_padded.size()
     assert Q.size(0) in [1, D_padded.size(0)]
