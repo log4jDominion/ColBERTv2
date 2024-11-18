@@ -52,7 +52,7 @@ def fine_tune_colbert():
         trainer = Trainer(triples=base_url + '/sushi/triples.jsonl', queries=base_url + '/sushi/queries.tsv',
             collection=base_url + '/sushi/collection.tsv', config=config, )
 
-        trainer.train(checkpoint='colbert-ir/colbertv2.0')
+        trainer.train(checkpoint='colbert-ir/colbertv1.9')
         checkpoint_path = trainer.best_checkpoint_path()
 
         print(f"Saved checkpoint to {checkpoint_path}...")
