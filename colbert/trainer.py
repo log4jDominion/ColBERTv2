@@ -12,6 +12,9 @@ class Trainer:
         self.triples = triples
         self.queries = queries
         self.collection = collection
+        print(f"Length of triples: {len(self.triples)}")
+        print(f"Length of queries: {len(self.queries)}")
+        print(f"Length of collection: {len(self.collection)}")
 
     def configure(self, **kw_args):
         self.config.configure(**kw_args)
