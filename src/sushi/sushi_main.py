@@ -4,10 +4,10 @@ import os
 import platform
 import json
 import pytrec_eval
+import sushi_rag as colbert
 
 from src.sushi.enums.env_vars import Vars
 import sushi_dry_run_data as data_util
-import fine_tune_colbert as colbert
 
 
 def set_env_vars():
@@ -38,7 +38,7 @@ def eval_model():
     results = []
     i = 0
 
-    colbert.fine_tune_colbert()
+    # colbert.fine_tune_colbert()
 
     for experimentSet in control_file['ExperimentSets']:
         training_dataset, labels = data_util.create_dry_run_data(experimentSet['TrainingDocuments'], search_fields)
