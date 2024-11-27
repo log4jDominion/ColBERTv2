@@ -1,5 +1,6 @@
 import os
 import re
+from collections import defaultdict
 
 import PyPDF2
 import pandas as pd
@@ -238,5 +239,71 @@ def extract_label_training_dataset(experiment_set, search_fields):
     return merged_text, label_text
 
 
+def map_pdf_structure(root_dir):
+    folder_map = {}
+    for item in os.listdir(root_dir):
+        if item.startswith("."):
+            continue
+
+        item_path = os.path.join(root_dir, item)
+        if os.path.isdir(item_path):
+            # If item is a folder, recurse into it
+            folder_map[item] = map_pdf_structure(item_path)
+        elif os.path.isfile(item_path) and item.endswith('.pdf'):
+            # If item is a PDF file, add to the current folder's list
+            folder_map.setdefault('pdf_files', []).append(item)
+    return folder_map
+
+
 def create_dry_run_data(experiment_set, search_fields):
     return extract_label_training_dataset(experiment_set, search_fields)
+
+
+def create_complete_collection():
+    fileMetadata = None
+    prefix = os.getenv(Vars.PREFIX.name)
+
+    # Read the Sushi Medadata and SNC excel files
+    try:
+        xls = pd.ExcelFile(prefix + 'SubtaskACollectionMetadataV1.1.xlsx')
+        fileMetadata = xls.parse(xls.sheet_names[0])
+    except Exception as e:
+        print(f"Error reading Excel file: {e}")
+        exit(-1)
+
+    folder_map = defaultdict(list)
+
+    for index, row in fileMetadata.iterrows():
+        if not row.isnull().all():
+            folder = row.get('Sushi Folder')
+            brown_title = row.get('Brown Title')
+            nara_title = row.get('NARA Title')
+
+            if brown_title != 'nan':
+                title = brown_title
+            else:
+                start = nara_title.find('Concerning')
+                if start != -1:
+                    nara_title = nara_title[start + 11:]
+                end1 = nara_title.rfind(':')
+                end2 = nara_title.rfind('(')
+                end = min(end1, end2)
+                if end != -1:
+                    nara_title = nara_title[:end]
+                title = nara_title
+
+            folder_map[folder].append(str(title))
+
+    merged_titles = {folder: "[SEP]".join(titles) for folder, titles in folder_map.items()}
+
+    training_set = []
+    training_label = []
+    for index, row in fileMetadata.iterrows():
+        if not row.isnull().all():
+            folder = row.get('Sushi Folder')
+            title = merged_titles[folder]
+            training_label.append(folder)
+            training_set.append(title)
+
+    return training_set, training_label
+
