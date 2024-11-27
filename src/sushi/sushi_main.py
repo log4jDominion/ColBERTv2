@@ -45,6 +45,7 @@ def eval_model():
         training_dataset, labels = data_util.create_complete_collection()
         topics = list(experimentSet['Topics'].keys())
         colbert.train_colbert(training_dataset, labels)
+        print(f'No of topics: {len(topics)}')
         for j in range(len(topics)):
             results.append({})
             results[i]['Id'] = topics[j]

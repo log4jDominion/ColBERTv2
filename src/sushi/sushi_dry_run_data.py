@@ -260,6 +260,7 @@ def create_dry_run_data(experiment_set, search_fields):
 
 
 def create_complete_collection():
+    print(f'Extracting representation of complete collection')
     fileMetadata = None
     prefix = os.getenv(Vars.PREFIX.name)
 
@@ -304,6 +305,9 @@ def create_complete_collection():
             title = merged_titles[folder]
             training_label.append(folder)
             training_set.append(title)
+
+    print(f'Total training set len: {len(training_set)}')
+    print(f'Total lable set len: {len(training_label)}')
 
     return training_set, training_label
 
