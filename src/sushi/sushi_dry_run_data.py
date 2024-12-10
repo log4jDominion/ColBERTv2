@@ -255,7 +255,7 @@ def map_pdf_structure(root_dir):
     return folder_map
 
 
-def create_dry_run_data(experiment_set, search_fields):
+def create_dry_run_data_titles(experiment_set, search_fields):
     return extract_label_training_dataset(experiment_set, search_fields)
 
 
@@ -305,6 +305,71 @@ def create_complete_collection():
             title = merged_titles[folder]
             training_label.append(folder)
             training_set.append(title)
+
+    print(f'Total training set len: {len(training_set)}')
+    print(f'Total lable set len: {len(training_label)}')
+
+    return training_set, training_label
+
+
+def create_box_ocr_map(trainingDocs):
+    file_metadata = None
+    prefix = os.getenv(Vars.PREFIX.name)
+    box_ocr_map = {}
+
+    try:
+        xls = pd.ExcelFile(prefix + 'SubtaskACollectionMetadataV1.1.xlsx')
+        file_metadata = xls.parse(xls.sheet_names[0])
+    except Exception as e:
+        print(f"Error reading Excel file: {e}")
+        exit(-1)
+
+    for trainingDoc in trainingDocs:
+
+        sushi_file = trainingDoc[-10:]
+        file = sushi_file
+        folder = str(file_metadata.loc[file_metadata['Sushi File'] == sushi_file, 'Sushi Folder'].iloc[0])
+        box = str(file_metadata.loc[file_metadata['Sushi File'] == sushi_file, 'Sushi Box'].iloc[0])
+
+        f = open(prefix + 'sushi-files/' + box + '/' + folder + '/' + file, 'rb')
+        reader = PyPDF2.PdfReader(f)
+        pages = len(reader.pages)
+        maxPages = 1  # Increase this number if you want to index more of the OCR text
+        fulltext = ''
+        for i in range(min(pages, maxPages)):
+            page = reader.pages[i]
+            text = page.extract_text().replace('\n', ' ')
+            fulltext = fulltext + text
+        box_ocr_map.setdefault(box, []).append(fulltext)
+
+    return {key: "[SEP]".join(value) for key, value in box_ocr_map.items()}
+
+
+def create_complete_ocr_collection(training_docs):
+    print(f'Extracting representation of complete collection')
+
+    box_ocr_map = create_box_ocr_map(training_docs)
+
+    file_metadata = None
+    prefix = os.getenv(Vars.PREFIX.name)
+
+    try:
+        xls = pd.ExcelFile(prefix + 'SubtaskACollectionMetadataV1.1.xlsx')
+        file_metadata = xls.parse(xls.sheet_names[0])
+    except Exception as e:
+        print(f"Error reading Excel file: {e}")
+        exit(-1)
+
+    training_set = []
+    training_label = []
+    for index, row in file_metadata.iterrows():
+        if not row.isnull().all():
+            folder = row.get('Sushi Folder')
+            box = row.get('Sushi Box')
+            training_label.append(folder)
+            training_set.append(box_ocr_map[box])
+            if not box_ocr_map[box]:
+                print(f'No training doc from box : {box}')
 
     print(f'Total training set len: {len(training_set)}')
     print(f'Total lable set len: {len(training_label)}')

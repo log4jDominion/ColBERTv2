@@ -42,7 +42,8 @@ def eval_model():
 
     for experimentSet in control_file['ExperimentSets']:
         # training_dataset, labels = data_util.create_complete_collection(experimentSet['TrainingDocuments'], search_fields)
-        training_dataset, labels = data_util.create_complete_collection()
+        # training_dataset, labels = data_util.create_complete_collection()
+        training_dataset, labels = data_util.create_complete_ocr_collection(experimentSet['TrainingDocuments'])
         topics = list(experimentSet['Topics'].keys())
         colbert.train_colbert(training_dataset, labels)
         print(f'No of topics: {len(topics)}')
