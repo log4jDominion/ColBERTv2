@@ -40,12 +40,13 @@ def eval_model():
 
     # colbert.fine_tune_colbert()
     training_dataset, labels = data_util.create_complete_ocr_collection(control_file)
+    colbert.train_colbert(training_dataset, labels)
 
     for experimentSet in control_file['ExperimentSets']:
         # training_dataset, labels = data_util.create_complete_collection(experimentSet['TrainingDocuments'], search_fields)
         # training_dataset, labels = data_util.create_complete_collection()
         topics = list(experimentSet['Topics'].keys())
-        colbert.train_colbert(training_dataset, labels)
+        # colbert.train_colbert(training_dataset, labels)
         print(f'No of topics: {len(topics)}')
         for j in range(len(topics)):
             results.append({})
