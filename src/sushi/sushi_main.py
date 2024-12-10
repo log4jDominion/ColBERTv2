@@ -23,7 +23,7 @@ def set_env_vars():
 
 
 def readExperimentControlFile():
-    file_name = 'Ntcir18SushiDryRunExperimentControlFileV1.1Dev.json'
+    file_name = 'Ntcir18SushiDryRunExperimentControlFileV1.1.json'
 
     with open(os.getenv(Vars.PREFIX.name) + file_name) as ecfFile:
         ecf = json.load(ecfFile)
