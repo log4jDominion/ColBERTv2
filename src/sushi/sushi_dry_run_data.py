@@ -345,34 +345,36 @@ def create_box_ocr_map(trainingDocs):
     return {key: "[SEP]".join(value) for key, value in box_ocr_map.items()}
 
 
-def create_complete_ocr_collection(training_docs):
+def create_complete_ocr_collection(control_file):
     print(f'Extracting representation of complete collection')
 
-    box_ocr_map = create_box_ocr_map(training_docs)
-
-    file_metadata = None
-    prefix = os.getenv(Vars.PREFIX.name)
-
-    try:
-        xls = pd.ExcelFile(prefix + 'SubtaskACollectionMetadataV1.1.xlsx')
-        file_metadata = xls.parse(xls.sheet_names[0])
-    except Exception as e:
-        print(f"Error reading Excel file: {e}")
-        exit(-1)
-
-    training_set = []
     training_label = []
-    for index, row in file_metadata.iterrows():
-        if not row.isnull().all():
-            folder = row.get('Sushi Folder')
-            box = row.get('Sushi Box')
-            training_label.append(folder)
-            training_set.append(box_ocr_map[box])
-            if not box_ocr_map[box]:
-                print(f'No training doc from box : {box}')
+    training_set = []
 
-    print(f'Total training set len: {len(training_set)}')
-    print(f'Total lable set len: {len(training_label)}')
+    for experimentSet in control_file['ExperimentSets']:
+        box_ocr_map = create_box_ocr_map(experimentSet['TrainingDocuments'])
+
+        file_metadata = None
+        prefix = os.getenv(Vars.PREFIX.name)
+
+        try:
+            xls = pd.ExcelFile(prefix + 'SubtaskACollectionMetadataV1.1.xlsx')
+            file_metadata = xls.parse(xls.sheet_names[0])
+        except Exception as e:
+            print(f"Error reading Excel file: {e}")
+            exit(-1)
+
+        for index, row in file_metadata.iterrows():
+            if not row.isnull().all():
+                folder = row.get('Sushi Folder')
+                box = row.get('Sushi Box')
+                training_label.append(folder)
+                training_set.append(box_ocr_map[box])
+                if not box_ocr_map[box]:
+                    print(f'No training doc from box : {box}')
+
+        print(f'Total training set len: {len(training_set)}')
+        print(f'Total lable set len: {len(training_label)}')
 
     return training_set, training_label
 
