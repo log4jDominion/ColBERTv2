@@ -23,7 +23,7 @@ def set_env_vars():
 
 
 def readExperimentControlFile():
-    file_name = 'Ntcir18SushiDryRunExperimentControlFileV1.1.json'
+    file_name = 'Ntcir18SushiDryRunExperimentControlFileV1.1Dev.json'
 
     with open(os.getenv(Vars.PREFIX.name) + file_name) as ecfFile:
         ecf = json.load(ecfFile)
@@ -39,14 +39,15 @@ def eval_model():
     i = 0
 
     # colbert.fine_tune_colbert()
-    training_dataset, labels = data_util.create_complete_ocr_collection(control_file)
-    colbert.train_colbert(training_dataset, labels)
+
+    #
 
     for experimentSet in control_file['ExperimentSets']:
         # training_dataset, labels = data_util.create_complete_collection(experimentSet['TrainingDocuments'], search_fields)
         # training_dataset, labels = data_util.create_complete_collection()
+        training_dataset, labels = data_util.extract_label_training_dataset(experimentSet['TrainingDocuments'], search_fields)
         topics = list(experimentSet['Topics'].keys())
-        # colbert.train_colbert(training_dataset, labels)
+        colbert.train_colbert(training_dataset, labels)
         print(f'No of topics: {len(topics)}')
         for j in range(len(topics)):
             results.append({})
@@ -129,7 +130,7 @@ def evaluateSearchResults(runFileName, folderQrelsFileName, boxQrelsFileName):
         folderEvaluator = pytrec_eval.RelevanceEvaluator(folderQrels, measures)
         folderTopicResults = folderEvaluator.evaluate(
             folderRun)  # replace run with folderQrels to see perfect evaluation measures
-
+        print(folderTopicResults)
         boxQrels = {}
         for line in boxQrelsFile:
             topicId, unused, folderId, relevanceLevel = line.split('\t')
@@ -142,7 +143,7 @@ def evaluateSearchResults(runFileName, folderQrelsFileName, boxQrelsFileName):
                 boxQrels[topicId][folderId] = int(relevanceLevel.strip())
         boxEvaluator = pytrec_eval.RelevanceEvaluator(boxQrels, measures)
         boxTopicResults = boxEvaluator.evaluate(boxRun)  # replace run with qrels to see perfect evaluation measures
-
+        print(boxTopicResults)
         pm = '\u00B1'
         print(f'          Folder          Box')
         for measure in measureNames.keys():
