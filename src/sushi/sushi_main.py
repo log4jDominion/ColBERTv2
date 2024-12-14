@@ -23,7 +23,7 @@ def set_env_vars():
 
 
 def readExperimentControlFile():
-    file_name = 'Ntcir18SushiDryRunExperimentControlFileV1.1.json'
+    file_name = 'Ntcir18SushiDryRunExperimentControlFileV1.1Dev.json'
 
     with open(os.getenv(Vars.PREFIX.name) + file_name) as ecfFile:
         ecf = json.load(ecfFile)
@@ -43,9 +43,9 @@ def eval_model():
     #
 
     for experimentSet in control_file['ExperimentSets']:
-        training_dataset, labels = data_util.create_complete_collection()
         # training_dataset, labels = data_util.create_complete_collection()
-        # training_dataset, labels = data_util.extract_label_training_dataset(experimentSet['TrainingDocuments'], search_fields)
+        # training_dataset, labels = data_util.create_complete_collection()
+        training_dataset, labels = data_util.extract_label_training_dataset(experimentSet['TrainingDocuments'], search_fields)
         topics = list(experimentSet['Topics'].keys())
         colbert.train_colbert(training_dataset, labels)
         print(f'No of topics: {len(topics)}')
@@ -130,7 +130,7 @@ def evaluateSearchResults(runFileName, folderQrelsFileName, boxQrelsFileName):
         folderEvaluator = pytrec_eval.RelevanceEvaluator(folderQrels, measures)
         folderTopicResults = folderEvaluator.evaluate(
             folderRun)  # replace run with folderQrels to see perfect evaluation measures
-        print(folderTopicResults)
+        print_results(folderTopicResults, folderRun)
         boxQrels = {}
         for line in boxQrelsFile:
             topicId, unused, folderId, relevanceLevel = line.split('\t')
@@ -151,6 +151,10 @@ def evaluateSearchResults(runFileName, folderQrelsFileName, boxQrelsFileName):
             boxMean, boxConf = stats(boxTopicResults, measure)
             print(f'{measureNames[measure]}: {folderMean:.3f}{pm}{folderConf:.2f}    {boxMean:.3f}{pm}{boxConf:.2f}')
 
+
+def print_results(folderTopicResults, folderRun):
+    print(folderTopicResults)
+    print(folderRun)
 
 if __name__ == '__main__':
     set_env_vars()
