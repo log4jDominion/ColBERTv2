@@ -23,7 +23,7 @@ def set_env_vars():
 
 
 def readExperimentControlFile():
-    file_name = 'Ntcir18SushiDryRunExperimentControlFileV1.1.json'
+    file_name = 'ecftest.json'
 
     with open(os.getenv(Vars.PREFIX.name) + file_name) as ecfFile:
         ecf = json.load(ecfFile)
@@ -169,5 +169,5 @@ if __name__ == '__main__':
     results = eval_model()
     writeSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv', results, 'Baseline-0')
     evaluateSearchResults(prefix + 'Ntcir18SushiDryRunResultsV1.1.tsv',
-                          prefix + 'Ntcir18SushiDryRunFolderQrelsV1.1.tsv',
-                          prefix + 'Ntcir18SushiDryRunBoxQrelsV1.1.tsv')
+                          prefix + 'folderQrelsTest.tsv',
+                          prefix + 'boxQrelsTest.tsv')
