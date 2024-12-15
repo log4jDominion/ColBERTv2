@@ -40,7 +40,7 @@ def translateNaraFolderLabel(naraLabel, sncExpansion, sushiFile, sushiFolder):
         else:
             print(f"NARA Folder Title doesn't have four parts: {naraLabel}")
             label = 'Bad NARA Folder Title'
-    return label, naraCountryCode, naraDate
+    return label
 
 
 def translateBrownFolderLabel(brownLabel, sncExpansion, sushiFile, sushiFolder):
