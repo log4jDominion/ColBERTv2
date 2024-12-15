@@ -273,7 +273,7 @@ if __name__ == '__main__':
                              'T18Eval', 1)
         print('Subtask A Official Test Collection Built (without Qrels)')
     else:
-        topicSets, trainingSets = setupEcf(queryTables, fullCollection, setSize=10, maxSets=10, condition=condition)
+        topicSets, trainingSets = setupEcf(queryTables, fullCollection, setSize=2, maxSets=2, condition=condition)
         topicSets = writeEcf(prefix + 'ecftest.json', 'Dry Run-Like Test Set of Selected Size', trainingSets, topicSets,
                              'TEST', 1)
         topicSets = setupQrels(queryTables, topicSets)
