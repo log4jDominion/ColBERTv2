@@ -246,7 +246,9 @@ def extract_label_training_dataset(experiment_set, search_fields):
             if type(elem) is tuple:
                 elem = ''.join(elem)
             complete_str += elem
-        merged_text.append(remove_special_characters(complete_str))
+        complete_str = remove_special_characters(complete_str)
+        print(complete_str)
+        merged_text.append(complete_str)
 
     label_text = [data[Vars.FOLDER.value] for data in training_set]
 
