@@ -211,6 +211,12 @@ def create_trainingSet(trainingDocs):
     return trainingSet
 
 
+def remove_special_characters(input_string):
+    # Use regex to replace all non-alphanumeric characters with an empty string
+    cleaned_string = re.sub(r'[^a-zA-Z0-9\s]', '', input_string)
+    return cleaned_string
+
+
 def extract_label_training_dataset(experiment_set, search_fields):
     training_set = create_trainingSet(experiment_set)
 
@@ -240,7 +246,7 @@ def extract_label_training_dataset(experiment_set, search_fields):
             if type(elem) is tuple:
                 elem = ''.join(elem)
             complete_str += elem
-        merged_text.append(complete_str)
+        merged_text.append(remove_special_characters(complete_str))
 
     label_text = [data[Vars.FOLDER.value] for data in training_set]
 
