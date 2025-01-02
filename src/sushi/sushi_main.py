@@ -4,7 +4,7 @@ import os
 import platform
 import json
 import pytrec_eval
-import train_colbert as colbert
+import sushi_rag as colbert
 
 from src.sushi.enums.env_vars import Vars
 import sushi_dry_run_data as data_util
