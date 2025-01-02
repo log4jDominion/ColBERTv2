@@ -223,15 +223,23 @@ def extract_label_training_dataset(experiment_set, search_fields):
     merged_text_list = [list(values) for values in zip(*training_data.values())]
 
     merged_text = []
+    # for lst in merged_text_list:
+    #     complete_str = Vars.CLS.value
+    #     for i, elem in enumerate(lst):
+    #         if type(elem) is tuple:
+    #             elem = ''.join(elem)
+    #         complete_str += elem
+    #         if i < len(lst) - 1:
+    #             complete_str += Vars.SEP.value
+    #     complete_str += Vars.CLS.value
+    #     merged_text.append(complete_str)
+
     for lst in merged_text_list:
-        complete_str = Vars.CLS.value
+        complete_str = ''
         for i, elem in enumerate(lst):
             if type(elem) is tuple:
                 elem = ''.join(elem)
             complete_str += elem
-            if i < len(lst) - 1:
-                complete_str += Vars.SEP.value
-        complete_str += Vars.CLS.value
         merged_text.append(complete_str)
 
     label_text = [data[Vars.FOLDER.value] for data in training_set]
