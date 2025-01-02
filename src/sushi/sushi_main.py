@@ -31,7 +31,7 @@ def readExperimentControlFile():
 
 
 def get_search_fields():
-    return ['title', 'ocr', 'folderlabel']
+    return ['title', 'folderlabel']
 
 
 def eval_model():

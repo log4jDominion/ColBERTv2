@@ -205,10 +205,8 @@ def create_trainingSet(trainingDocs):
                 ocr = title
 
         text = summary + ' ' + ocr
-        # trainingSet.append(
-        #     {'docno': file, 'folder': folder, 'box': box, 'title': title, 'ocr': text, 'folderlabel': label})
         trainingSet.append(
-            {'docno': file, 'folder': folder, 'box': box, 'title': title, 'folderlabel': label})
+            {'docno': file, 'folder': folder, 'box': box, 'title': title, 'ocr': text, 'folderlabel': label})
 
     return trainingSet
 
