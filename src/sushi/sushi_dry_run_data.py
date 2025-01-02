@@ -213,7 +213,7 @@ def create_trainingSet(trainingDocs):
 
 def remove_special_characters(input_string):
     # Use regex to replace all non-alphanumeric characters with an empty string
-    cleaned_string = re.sub(r'[^a-zA-Z0-9\s]', '', input_string)
+    cleaned_string = re.sub(r'[^a-zA-Z\s]', '', input_string)
     return cleaned_string
 
 
