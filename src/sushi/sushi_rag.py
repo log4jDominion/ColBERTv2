@@ -16,7 +16,7 @@ def train_model(nbits, doc_maxlen):
         document_ids=['sushi'],
         document_metadatas=[{"entity": "sushi", "source": "ocr"}],
         index_name=index_name,
-        max_document_length=doc_maxlen,
+        max_document_length=20,
         split_documents=True
     )
 
