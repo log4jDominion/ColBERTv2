@@ -31,7 +31,8 @@ def colbert_search(query):
 
     print(f'Ranked List for query: {query} \n {results}')
 
-    for content, score, rank, result_index in zip(*results):
+    for score, rank, result_index in zip(*results):
+        print(f'Score: {score}, rank: {rank}, result_index: {result_index}')
         ranked_list.append(labels[result_index])
 
     # for passage_id, rank, score in zip(*results):
