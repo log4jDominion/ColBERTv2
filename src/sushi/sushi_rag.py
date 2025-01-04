@@ -25,13 +25,11 @@ def train_model(nbits, doc_maxlen):
 def colbert_search(query):
     # results = RAG.search(query=query, k=1000)
 
-    results = RAG.rerank(query=query, documents=collection, k=3)
+    results = RAG.rerank(query=query, documents=collection, k=10)
 
     ranked_list = []
 
     for result in results:
-        print(type(result))
-        print(result)
         score = result['score']
         rank = result['rank']
         passage_id = result['result_index']
