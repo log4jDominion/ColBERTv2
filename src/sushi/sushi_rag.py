@@ -52,6 +52,6 @@ def train_colbert(training_data, training_labels):
     global labels
     labels = training_labels
 
-    # train_model(2, 300)
+    train_model(2, 300)
 
     print(f'***********************Indexing ends at {datetime.datetime.now()}*************************')
