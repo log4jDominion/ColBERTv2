@@ -1,5 +1,6 @@
 import datetime
 from ragatouille import RAGPretrainedModel
+from ragatouille.data import CorpusProcessor, llama_index_sentence_splitter
 
 collection = []
 labels = []
@@ -22,12 +23,19 @@ def train_model(nbits, doc_maxlen):
 
 
 def colbert_search(query):
-    results = RAG.search(query=query, k=1000)
+    # results = RAG.search(query=query, k=1000)
+
+    results = RAG.rerank(query=query, documents=collection, k=3)
 
     ranked_list = []
 
-    for passage_id, rank, score in zip(*results):
-        ranked_list.append(labels[passage_id])
+    print(f'Ranked List for query: {query} \n {results}')
+
+    for content, score, rank, result_index in zip(*results):
+        ranked_list.append(labels[result_index])
+
+    # for passage_id, rank, score in zip(*results):
+    #     ranked_list.append(labels[passage_id])
         # print(f"\t{labels[passage_id]} \t\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {searcher.collection[passage_id]}")
 
     return ranked_list
@@ -42,6 +50,6 @@ def train_colbert(training_data, training_labels):
     global labels
     labels = training_labels
 
-    train_model(2, 300)
+    # train_model(2, 300)
 
     print(f'***********************Indexing ends at {datetime.datetime.now()}*************************')

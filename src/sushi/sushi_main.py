@@ -4,7 +4,7 @@ import os
 import platform
 import json
 import pytrec_eval
-import sushi_rag as colbert
+import fine_tune_colbert as colbert
 
 from src.sushi.enums.env_vars import Vars
 import sushi_dry_run_data as data_util
@@ -31,7 +31,7 @@ def readExperimentControlFile():
 
 
 def get_search_fields():
-    return ['title']
+    return ['title', 'ocr', 'folderlabel']
 
 
 def eval_model():
