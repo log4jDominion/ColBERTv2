@@ -13,31 +13,31 @@ RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 
 def train_model(nbits, doc_maxlen):
     RAG.index(
-        collection=[collection],
+        collection=collection,
         document_ids=['sushi'],
         document_metadatas=[{"entity": "sushi", "source": "ocr"}],
         index_name=index_name,
-        max_document_length=20,
+        max_document_length=doc_maxlen,
         split_documents=True
     )
 
 
 def colbert_search(query):
-    # results = RAG.search(query=query, k=1000)
+    results = RAG.search(query=query, k=1000)
 
-    results = RAG.rerank(query=query, documents=collection, k=1000)
-
+    # results = RAG.rerank(query=query, documents=collection, k=1000)
+    #
     ranked_list = []
-
-    for result in results:
-        score = result['score']
-        rank = result['rank']
-        passage_id = result['result_index']
-        print(f'Score: {score}, Rank: {rank}, Passage_ID: {passage_id}')
-        ranked_list.append(labels[passage_id])
-
-    # for passage_id, rank, score in zip(*results):
+    #
+    # for result in results:
+    #     score = result['score']
+    #     rank = result['rank']
+    #     passage_id = result['result_index']
+    #     print(f'Score: {score}, Rank: {rank}, Passage_ID: {passage_id}')
     #     ranked_list.append(labels[passage_id])
+
+    for passage_id, rank, score in zip(*results):
+        ranked_list.append(labels[passage_id])
         # print(f"\t{labels[passage_id]} \t\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {searcher.collection[passage_id]}")
 
     return ranked_list
