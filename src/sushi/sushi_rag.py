@@ -25,7 +25,7 @@ def train_model(nbits, doc_maxlen):
 def colbert_search(query):
     # results = RAG.search(query=query, k=1000)
 
-    results = RAG.rerank(query=query, documents=collection, k=10)
+    results = RAG.rerank(query=query, documents=collection, k=1000)
 
     ranked_list = []
 

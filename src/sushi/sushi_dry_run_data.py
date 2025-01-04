@@ -361,6 +361,44 @@ def create_box_ocr_map(trainingDocs):
     return {key: "[SEP]".join(value) for key, value in box_ocr_map.items()}
 
 
+def create_box_title_map(training_docs):
+    file_metadata = None
+    prefix = os.getenv(Vars.PREFIX.name)
+    box_title_map = {}
+
+    try:
+        xls = pd.ExcelFile(prefix + 'SubtaskACollectionMetadataV1.1.xlsx')
+        file_metadata = xls.parse(xls.sheet_names[0])
+    except Exception as e:
+        print(f"Error reading Excel file: {e}")
+        exit(-1)
+
+    for trainingDoc in training_docs:
+        sushi_file = trainingDoc[-10:]
+        file = sushi_file
+        folder = str(file_metadata.loc[file_metadata['Sushi File'] == sushi_file, 'Sushi Folder'].iloc[0])
+        box = str(file_metadata.loc[file_metadata['Sushi File'] == sushi_file, 'Sushi Box'].iloc[0])
+
+        brownTitle = str(file_metadata.loc[file_metadata['Sushi File'] == sushi_file, 'Brown Title'].iloc[0])
+        naraTitle = str(file_metadata.loc[file_metadata['Sushi File'] == sushi_file, 'NARA Title'].iloc[0])
+        if brownTitle != 'nan':
+            title = brownTitle
+        else:
+            start = naraTitle.find('Concerning')
+            if start != -1:
+                naraTitle = naraTitle[start + 11:]
+            end1 = naraTitle.rfind(':')
+            end2 = naraTitle.rfind('(')
+            end = min(end1, end2)
+            if end != -1:
+                naraTitle = naraTitle[:end]
+            title = naraTitle
+
+        box_title_map.setdefault(box, []).append(title)
+
+    return {key: "[SEP]".join(value) for key, value in box_title_map.items()}
+
+
 def create_complete_ocr_collection(control_file):
     print(f'Extracting representation of complete collection')
 
@@ -369,6 +407,7 @@ def create_complete_ocr_collection(control_file):
 
     for experimentSet in control_file['ExperimentSets']:
         box_ocr_map = create_box_ocr_map(experimentSet['TrainingDocuments'])
+        box_title_map = create_box_title_map(experimentSet['TrainingDocuments'])
 
         file_metadata = None
         prefix = os.getenv(Vars.PREFIX.name)
@@ -385,7 +424,7 @@ def create_complete_ocr_collection(control_file):
                 folder = row.get('Sushi Folder')
                 box = row.get('Sushi Box')
                 training_label.append(folder)
-                training_set.append(box_ocr_map[box])
+                training_set.append(box_title_map[box] + box_ocr_map[box])
                 if not box_ocr_map[box]:
                     print(f'No training doc from box : {box}')
 
@@ -393,4 +432,3 @@ def create_complete_ocr_collection(control_file):
         print(f'Total lable set len: {len(training_label)}')
 
     return training_set, training_label
-
