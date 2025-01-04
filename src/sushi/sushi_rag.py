@@ -32,7 +32,9 @@ def colbert_search(query):
     for result in results:
         print(type(result))
         print(result)
-        score = result['score'], rank = result['rank'], passage_id = result['result_index']
+        score = result['score']
+        rank = result['rank']
+        passage_id = result['result_index']
         print(f'Score: {score}, Rank: {rank}, Passage_ID: {passage_id}')
         ranked_list.append(labels[passage_id])
 
