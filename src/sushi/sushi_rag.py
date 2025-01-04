@@ -14,7 +14,6 @@ RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 def train_model(nbits, doc_maxlen):
     RAG.index(
         collection=collection,
-        document_ids=['sushi'],
         document_metadatas=[{"entity": "sushi", "source": "ocr"}],
         index_name=index_name,
         max_document_length=doc_maxlen,
