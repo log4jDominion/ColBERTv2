@@ -12,23 +12,22 @@ RAG = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
 
 
 def train_model(nbits, doc_maxlen):
-    # RAG.index(
-    #     collection=collection,
-    #     index_name=index_name,
-    #     max_document_length=doc_maxlen,
-    #     split_documents=True,
-    # )
-    RAG.encode([document for document in collection])
+    RAG.index(
+         collection=collection,
+         index_name=index_name,
+         max_document_length=doc_maxlen,
+         split_documents=True,)
+    # RAG.encode([document for document in collection])
 
 
 def colbert_search(query):
-    # results = RAG.search(query=query, k=1000)
-    results = RAG.search_encoded_docs(query=query, k=5)
+    results = RAG.search(query=query, k=5)
+    # results = RAG.search_encoded_docs(query=query, k=5)
 
     # results = RAG.rerank(query=query, documents=collection, k=1000)
     #
     ranked_list = []
-    print(results)
+    # print(results)
     #
     # for result in results:
     #     score = result['score']
