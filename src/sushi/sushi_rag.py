@@ -18,7 +18,7 @@ def train_model(nbits, doc_maxlen):
     #     max_document_length=doc_maxlen,
     #     split_documents=True,
     # )
-    RAG.encode(document for document in collection)
+    RAG.encode([document for document in collection])
 
 
 def colbert_search(query):
