@@ -4,7 +4,7 @@ import os
 import platform
 import json
 import pytrec_eval
-import train_colbert as colbert
+import fine_tune_colbert as colbert
 
 from src.sushi.enums.env_vars import Vars
 import sushi_dry_run_data as data_util
@@ -38,7 +38,7 @@ def eval_model():
     results = []
     i = 0
 
-    # colbert.fine_tune_colbert()
+    colbert.fine_tune_colbert()
 
     #
     training_dataset, labels = data_util.create_complete_ocr_collection(control_file)
