@@ -4,7 +4,7 @@ import os
 import platform
 import json
 import pytrec_eval
-import sushi_rag as colbert
+import train_colbert as colbert
 
 from src.sushi.enums.env_vars import Vars
 import sushi_dry_run_data as data_util
@@ -42,13 +42,13 @@ def eval_model():
 
     #
     training_dataset, labels = data_util.create_complete_ocr_collection(control_file)
-    # colbert.train_colbert(training_dataset, labels)
+    colbert.train_colbert(training_dataset, labels)
 
     for experimentSet in control_file['ExperimentSets']:
         # training_dataset, labels = data_util.create_complete_collection()
         # training_dataset, labels = data_util.create_complete_collection()
         # training_dataset, labels = data_util.extract_label_training_dataset(experimentSet['TrainingDocuments'],search_fields)
-        colbert.train_colbert(training_dataset, labels)
+        # colbert.train_colbert(training_dataset, labels)
         topics = list(experimentSet['Topics'].keys())
         print(f'No of topics: {len(topics)}')
         for j in range(len(topics)):

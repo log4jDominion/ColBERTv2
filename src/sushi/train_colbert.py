@@ -29,7 +29,7 @@ def colbert_search(query):
         searcher = Searcher(index=index_name, config=config)
 
     # Find the top-5 passages for this query
-    results = searcher.search(query, k=5)
+    results = searcher.search(query, k=1000)
 
     ranked_list = []
 
