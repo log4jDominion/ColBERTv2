@@ -46,7 +46,7 @@ def build_qrels(queries):
 
 def fine_tune_colbert():
     base_url = os.getenv(Vars.RESOURCES.name)
-    with Run().context(RunConfig(nranks=4, experiment=experiment_name)):
+    with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
         config = ColBERTConfig(bsize=32, lr=1e-05, warmup=20000, doc_maxlen=180, dim=128, attend_to_mask_tokens=False, nway=64, accumsteps=1, similarity='cosine', use_ib_negatives=True)
         trainer = Trainer(triples=base_url + '/msmarco/examples.json', queries=base_url + '/msmarco/queries/queries.train.tsv',
                           collection=base_url + '/msmarco/collection.tsv', config=config, )
