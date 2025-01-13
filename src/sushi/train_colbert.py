@@ -5,7 +5,7 @@ from colbert import Indexer, Searcher
 from colbert.infra import Run, RunConfig, ColBERTConfig
 from src.sushi.enums.env_vars import Vars
 
-results = {}
+query_results = {}
 collection = []
 labels = []
 index_name = 'sushi.colbert'
@@ -38,8 +38,7 @@ def colbert_search(queryIdx, query):
 
     for passage_id, passage_rank, passage_score in zip(*results):
         ranked_list.append(labels[passage_id])
-        results.setdefault(queryIdx, [])
-        results[queryIdx].append([passage_id, passage_score])
+        query_results.setdefault(queryIdx, []).append([passage_id, passage_score])
         # print(f"\t{labels[passage_id]} \t\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {searcher.collection[passage_id]}")
 
     queryIdx += 1
@@ -50,7 +49,7 @@ def write_query_results():
     prefix = os.getenv(Vars.PREFIX.name)
     file_name = 'SushiQueryResults.tsv'
     with open(file_name, 'w') as f:
-        for row in results:
+        for row in query_results:
             print(row, file=f)
 
     f.close()
