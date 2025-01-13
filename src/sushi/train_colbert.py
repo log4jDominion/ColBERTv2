@@ -38,7 +38,6 @@ def colbert_search(queryIdx, query):
 
     for passage_id, passage_rank, passage_score in zip(*results):
         ranked_list.append(labels[passage_id])
-        print(f'QueryIndex : {queryIdx} \t\t PassageId and PassageScore: {[passage_id, passage_score]}')
         query_results.setdefault(queryIdx, []).append([passage_id, passage_score])
         # print(f"\t{labels[passage_id]} \t\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {searcher.collection[passage_id]}")
 
@@ -47,6 +46,7 @@ def colbert_search(queryIdx, query):
 
 
 def write_query_results():
+    print(query_results)
     prefix = os.getenv(Vars.PREFIX.name)
     file_name = 'SushiQueryResults.tsv'
     with open(file_name, 'w') as f:
