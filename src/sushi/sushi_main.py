@@ -55,7 +55,7 @@ def eval_model():
             results.append({})
             results[i]['Id'] = topics[j]
             query = experimentSet['Topics'][topics[j]]['TITLE']
-            rankedFolderList = colbert.colbert_search(query)
+            rankedFolderList = colbert.colbert_search(j,query)
             results[i]['RankedList'] = rankedFolderList
             i += 1
         colbert.write_query_results()

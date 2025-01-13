@@ -5,7 +5,6 @@ from colbert import Indexer, Searcher
 from colbert.infra import Run, RunConfig, ColBERTConfig
 from src.sushi.enums.env_vars import Vars
 
-queryIdx = 1
 results = {}
 collection = []
 labels = []
@@ -27,7 +26,7 @@ def train_model(nbits, doc_maxlen):
     indexer.get_index()
 
 
-def colbert_search(query):
+def colbert_search(queryIdx, query):
     with Run().context(RunConfig(nranks=1, experiment=experiment_name)):
         config = ColBERTConfig(root=experiment_name)
         searcher = Searcher(index=index_name, config=config)
@@ -39,12 +38,9 @@ def colbert_search(query):
 
     for passage_id, passage_rank, passage_score in zip(*results):
         ranked_list.append(labels[passage_id])
-        global queryIdx
         results[queryIdx].append([passage_id, passage_score])
-        print(
-            f"\t{labels[passage_id]} \t\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {searcher.collection[passage_id]}")
+        # print(f"\t{labels[passage_id]} \t\t [{passage_rank}] \t\t {passage_score:.1f} \t\t {searcher.collection[passage_id]}")
 
-    global queryIdx
     queryIdx += 1
     return ranked_list
 
