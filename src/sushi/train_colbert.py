@@ -52,7 +52,7 @@ def write_query_results():
     with open(file_name, 'w') as f:
         for key, value in query_results.items():
             f.write(f'{key},')
-            f.write(value)
+            f.write(f'{value}')
             f.write(f'\n')
     f.close()
 
