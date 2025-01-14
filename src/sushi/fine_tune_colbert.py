@@ -64,7 +64,7 @@ def fine_tune_colbert():
         checkpoint_path = trainer.best_checkpoint_path()
 
         print(f"Saved checkpoint to {checkpoint_path}...")
-        print("******************* Starting Fine Tuning *******************")
+        print("******************* Ending Fine Tuning *******************")
         global checkpoint
         checkpoint = checkpoint_path
 
