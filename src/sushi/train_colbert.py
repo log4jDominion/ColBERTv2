@@ -32,7 +32,7 @@ def colbert_search(queryIdx, query):
         searcher = Searcher(index=index_name, config=config)
 
     # Find the top-5 passages for this query
-    results = searcher.search(query, k=1000)
+    results = searcher.search(query, k=20)
 
     ranked_list = []
 
@@ -51,8 +51,8 @@ def write_query_results():
     file_name = 'SushiQueryResults.txt'
     with open(file_name, 'w') as f:
         for key, value in query_results.items():
-            f.write(f'{key},')
-            f.write(f'{value}')
+            f.write(f'[{key},')
+            f.write(f'{value}]')
             f.write(f'\n')
     f.close()
 
