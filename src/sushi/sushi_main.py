@@ -146,7 +146,7 @@ def evaluateSearchResults(runFileName, folderQrelsFileName, boxQrelsFileName):
                 boxQrels[topicId][folderId] = int(relevanceLevel.strip())
         boxEvaluator = pytrec_eval.RelevanceEvaluator(boxQrels, measures)
         boxTopicResults = boxEvaluator.evaluate(boxRun)  # replace run with qrels to see perfect evaluation measures
-        print(boxTopicResults)
+        # print(boxTopicResults)
         pm = '\u00B1'
         print(f'          Folder          Box')
         for measure in measureNames.keys():
