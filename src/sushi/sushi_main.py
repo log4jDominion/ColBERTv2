@@ -133,7 +133,7 @@ def evaluateSearchResults(runFileName, folderQrelsFileName, boxQrelsFileName):
         folderEvaluator = pytrec_eval.RelevanceEvaluator(folderQrels, measures)
         folderTopicResults = folderEvaluator.evaluate(
             folderRun)  # replace run with folderQrels to see perfect evaluation measures
-        print_results(folderTopicResults, folderRun)
+        # print_results(folderTopicResults, folderRun)
         boxQrels = {}
         for line in boxQrelsFile:
             topicId, unused, folderId, relevanceLevel = line.split('\t')

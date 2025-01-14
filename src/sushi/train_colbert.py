@@ -48,11 +48,12 @@ def colbert_search(queryIdx, query):
 def write_query_results():
     print(query_results)
     prefix = os.getenv(Vars.PREFIX.name)
-    file_name = 'SushiQueryResults.tsv'
+    file_name = 'SushiQueryResults.txt'
     with open(file_name, 'w') as f:
-        for row in query_results:
-            print(row, file=f)
-
+        for key, value in query_results.items():
+            f.write(f'{key},')
+            f.write(value)
+            f.write(f'\n')
     f.close()
 
 
